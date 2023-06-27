@@ -1,0 +1,88 @@
+{% extends 'blogs/base.html' %}
+{% load bootstrap4 %}
+
+
+{% block page_header %}
+<h2>Post</h2>
+{% endblock page_header %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">{{ post.title }}</h4>
+        <h6 class="card-subtitle mb-2 text-muted">{{ post.owner.username }}</h6>
+        <p class="card-text">{{ post.text }}</p>
+        <p class="card-subtitle mb-2 text-muted">{{ post.date_added|date:'M d, Y H:i' }}</p>
+        <div class="btn-group" role="group" aria-label="Post actions">
+            {% if post.owner == user %}
+            <a class="btn btn-primary" href="{% url 'blogs:edit_post' post.id %}" role="button">Edit post</a>
+            {% endif %}
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#comments{{ post.id }}"
+                aria-expanded="false" aria-controls="comments">
+                Comments
+            </button>
+        </div>
+        <div class="collapse" id="comments{{ post.id }}">
+            <div class="card mt-2">
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                    <button class="btn btn-primary mb-2" type="button" data-toggle="modal"
+                        data-target="#addComment{{ post.id }}">
+                        Add comment
+                    </button>
+                    {% endif %}
+
+                    <div class="modal" id="addComment{{ post.id }}" tabindex="-1" role="dialog"
+                        aria-labelledby="addComment{{ post.id }}Label" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addComment{{ post.id }}Label">Add comment</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        &times;
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="{% url 'blogs:view_post' post.id %}" method="post" class="form">
+                                        {% csrf_token %}
+                                        {#{% bootstrap_form form %}#}
+                                        {#{% buttons %}#}
+                                        {#<button class="btn btn-primary" name="submit">Add comment</button>#}
+                                        {#{% endbuttons %}#}
+                                        {#<input name="post_id" type="hidden" value="{{ post.id }}">#}
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" name="text">
+                                            <input name="post" type="hidden" value="{{ post }}">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary" type="submit">Add
+                                                    comment</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% for comment in comments %}
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="media">
+                                {#<img class="d-flex align-self-start mr-3" scr="" alt="{{ user.username }} avatar">#}
+                                <div class="media-body">
+                                    <h5>{{ comment.owner.username }}</h5>
+                                    <p>{{ comment }}</p>
+                                    <p class="text-muted">{{ comment.date_added }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>There are no any comments added yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
